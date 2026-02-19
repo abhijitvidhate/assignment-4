@@ -1,0 +1,11 @@
+# Parameterized values for microservice deployment
+image:
+  repository: user-service
+  tag: latest
+service:
+  type: ClusterIP
+  port: 8000
+env:
+  JWT_SECRET: "robosecret"
+  SQLITE_DB_PATH: "/app/sqlite.db"
+resources: {}

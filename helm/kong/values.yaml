@@ -1,0 +1,28 @@
+# Parameterized values for Kong deployment
+proxy:
+  type: NodePort
+  http:
+    enabled: true
+    servicePort: 8000
+    nodePort: 30000
+admin:
+  enabled: true
+  type: NodePort
+  http:
+    enabled: true
+    servicePort: 8001
+    nodePort: 30001
+plugins:
+  - custom-header
+jwt:
+  enabled: true
+  secretName: kong-jwt-secret
+rateLimiting:
+  enabled: true
+  config:
+    minute: 10
+    policy: local
+ipRestriction:
+  enabled: true
+  allow:
+    - 127.0.0.1/32
