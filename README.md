@@ -1,5 +1,91 @@
 # Secure API Platform using Kong on Kubernetes
 
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your local machine:
+
+- **Minikube** - Lightweight Kubernetes cluster
+- **kubectl** - Kubernetes command-line tool
+- **Helm 3** - Kubernetes package manager
+- **Docker** - Container runtime
+- **Python 3** - For JWT token generation
+- **hey** - Load testing tool (optional, for DDoS testing)
+
+## Installation Scripts
+
+All installation scripts are provided in `/home/abhijit/Talentica-Assignment-4/` for easy setup.
+
+### 1. Install Minikube
+```sh
+bash /home/abhijit/install-minikube.sh
+```
+This script installs both Minikube and kubectl.
+
+### 2. Install Docker
+```sh
+bash /home/abhijit/install-docker.sh
+```
+This script installs Docker and enables it as the Minikube driver.
+
+### 3. Install Helm
+```sh
+bash /home/abhijit/install-helm.sh
+```
+This script installs Helm 3 for managing Kubernetes packages.
+
+### 4. Install hey (Load Testing Tool)
+```sh
+bash /home/abhijit/install-hey.sh
+```
+This script installs the `hey` load testing tool for DDoS simulation and testing.
+
+## Quick Start
+
+Once all prerequisites are installed, follow these steps:
+
+### 1. Start Minikube
+```sh
+minikube start --driver=docker
+```
+
+### 2. Set up Docker environment
+```sh
+eval $(minikube docker-env)
+```
+
+### 3. Build microservice Docker image
+```sh
+cd /home/abhijit/Talentica-Assignment-4/microservice
+docker build -t user-service:latest .
+```
+
+### 4. Deploy microservice using Helm
+```sh
+helm install user-service /home/abhijit/Talentica-Assignment-4/helm/user-service
+```
+
+### 5. Deploy Kong using Helm
+```sh
+helm repo add kong https://charts.konghq.com
+helm repo update
+helm install kong kong/kong -f /home/abhijit/Talentica-Assignment-4/helm/kong/values.yaml
+```
+
+### 6. Apply Kong declarative configuration
+```sh
+kubectl port-forward svc/kong-kong-admin 8001:8001 -n default &
+sleep 2
+curl -i -X POST http://localhost:8001/config \
+  --data-binary @/home/abhijit/Talentica-Assignment-4/kong/kong.yaml \
+  -H "Content-Type: application/yaml"
+```
+
+### 7. Generate JWT Token
+```sh
+python3 /home/abhijit/generate_jwt.py robokey robosecret
+```
+Save this token for testing protected endpoints.
+
 ## Architecture Overview
 The platform uses Kong Gateway as an API entrypoint on Kubernetes, routing requests to a FastAPI microservice with a local SQLite database. Kong enforces JWT authentication, rate limiting, IP whitelisting, and injects custom headers via a Lua plugin. DDoS protection is implemented using Kong plugins or ModSecurity.
 
