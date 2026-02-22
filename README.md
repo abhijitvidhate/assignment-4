@@ -380,3 +380,34 @@ To demonstrate DDoS protection:
 
 5. **Demo explanation:**  
    - "Since my local IP is not in the allow list, Kong blocks my request. In a real-world scenario, you would test from different machines or networks to demonstrate allowed and denied access."
+
+
+
+## Architecture Explanation
+
+1. **Client** sends HTTP requests to Kong's public endpoint.
+
+2. **Kong API Gateway** (entry point):
+   - Intercepts all requests.
+   - Applies JWT authentication (except for `/health` and `/verify`).
+   - Enforces rate limiting (10 req/min per IP).
+   - Applies IP whitelisting (only allowed CIDRs).
+   - Runs DDoS protection (ModSecurity rules).
+   - Injects custom headers via Lua plugin.
+   - Routes valid requests to the microservice.
+
+3. **Microservice (FastAPI)** processes requests:
+   - Authenticates users (`/login`).
+   - Manages user records (CRUD operations).
+   - Returns responses to Kong.
+
+4. **SQLite Database** stores user data locally:
+   - Auto-initialized on startup.
+   - No external database required.
+   - Passwords stored as bcrypt hashes.
+
+5. **Kubernetes** orchestrates the platform:
+   - Helm charts define all resources declaratively.
+   - All components are containerized and scalable.
+
+![alt text](image.png)
